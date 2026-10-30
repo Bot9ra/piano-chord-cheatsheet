@@ -35,12 +35,12 @@ button:focus-visible,.key:focus-visible{outline:3px solid var(--felt);outline-of
 .btn.ghost{background:transparent;color:var(--felt)}
 .btn:active{transform:translateY(1px)}
 .kb-wrap{overflow-x:auto;padding:1rem .2rem 0}
-.keyboard{position:relative;display:flex;height:220px;min-width:640px;background:var(--ebony);
+.keyboard{position:relative;display:flex;height:220px;min-width:900px;background:var(--ebony);
   padding:10px 6px 6px;border-radius:8px 8px 4px 4px;border-top:10px solid var(--felt)}
 .key{position:relative;cursor:pointer;user-select:none;display:flex;align-items:flex-end;justify-content:center}
 .key.w{flex:1;background:var(--ivory);border:1px solid #b9b6ac;border-radius:0 0 5px 5px;
   color:#555;font-size:.78rem;padding-bottom:.5rem}
-.key.b{position:absolute;top:0;height:60%;width:5.2%;background:var(--ebony);z-index:2;
+.key.b{position:absolute;top:0;height:60%;background:var(--ebony);z-index:2;
   border:1px solid #000;border-radius:0 0 4px 4px;color:#ddd;font-size:.7rem;padding-bottom:.3rem;
   box-shadow:0 3px 0 #000}
 .key.w.on{background:var(--felt);color:#fff;border-color:var(--felt)}
@@ -60,3 +60,5 @@ button:focus-visible,.key:focus-visible{outline:3px solid var(--felt);outline-of
 footer{text-align:center;color:var(--muted);font-size:.85rem;padding:1.5rem 1rem 2rem}
 @media (max-width:560px){.row{flex-direction:column;gap:.2rem}.lbl{flex:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.all h4{grid-column:1/-1;margin:.6rem 0 0;font-size:.95rem;color:var(--muted);font-weight:600}
+.all h4:first-child{margin-top:0}
