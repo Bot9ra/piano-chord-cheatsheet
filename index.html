@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Шпаргалка пианиста — аккорды на клавиатуре</title>
+<meta name="description" content="Интерактивный справочник аккордов: выберите ноту и тип аккорда, увидите клавиши и услышите звучание.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <h1>Шпаргалка пианиста</h1>
+  <p>Выберите ноту и тип аккорда: клавиши подсветятся, а нажатие на «Играть» озвучит его.</p>
+</header>
+
+<main>
+  <section class="panel" aria-label="Выбор аккорда">
+    <div class="row">
+      <span class="lbl">Нота</span>
+      <div id="roots" class="chips" role="group" aria-label="Основная нота"></div>
+    </div>
+    <div class="row">
+      <span class="lbl">Тип</span>
+      <div id="types" class="chips" role="group" aria-label="Тип аккорда"></div>
+    </div>
+    <div class="row">
+      <span class="lbl">Обращение</span>
+      <div id="invs" class="chips" role="group" aria-label="Обращение"></div>
+    </div>
+    <div class="row">
+      <span class="lbl">Названия нот</span>
+      <div class="chips" role="group" aria-label="Система названий нот">
+        <button id="langEn" class="chip on">C D E</button>
+        <button id="langRu" class="chip">До Ре Ми</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="result" aria-live="polite">
+    <h2 id="chordName"></h2>
+    <p id="chordNotes" class="notes"></p>
+    <p id="chordInfo" class="info"></p>
+    <div class="actions">
+      <button id="playChord" class="btn">Играть аккорд</button>
+      <button id="playArp" class="btn ghost">Играть по нотам</button>
+    </div>
+  </section>
+
+  <section aria-label="Клавиатура">
+    <div class="kb-wrap"><div id="keyboard" class="keyboard"></div></div>
+    <p class="hint">Клавиши кликабельны: нажмите любую, чтобы услышать ноту.</p>
+  </section>
+
+  <section class="panel" aria-label="Все аккорды от выбранной ноты">
+    <h3 id="allTitle"></h3>
+    <div id="all" class="all"></div>
+  </section>
+</main>
+
+<footer>Учебный проект · Разработка интерактивного веб-справочника для визуализации аккордов</footer>
+<script src="script.js"></script>
+</body>
+</html>
