@@ -1,68 +1,263 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Шпаргалка пианиста — аккорды на клавиатуре</title>
-<meta name="description" content="Интерактивный справочник аккордов: выберите ноту и тип аккорда, увидите клавиши и услышите звучание.">
-<link rel="stylesheet" href="style.css">
+<title>Интерактивная шпаргалка пианиста</title>
+<style>
+:root{--bg:#e9eef3;--panel:#fff;--ink:#14213d;--mute:#5b6678;--line:#cdd6e0;--acc:#2f5bea;--accT:#fff;--root:#e08a00;--wk:#fbfcfd;--bk:#14213d;--ok:#1a7f4b;--bad:#b3261e}
+@media (prefers-color-scheme:dark){:root{--bg:#10151f;--panel:#1a2230;--ink:#e8edf5;--mute:#9aa6ba;--line:#2e3a4f;--acc:#6f93ff;--accT:#0b1020;--root:#f0a020;--wk:#e9edf3;--bk:#05080e;--ok:#4cc58a;--bad:#ff8a80}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 16px 40px}
+main{max-width:1000px;margin:0 auto}
+h1{font:600 clamp(26px,5vw,40px)/1.15 Georgia,"Iowan Old Style",serif;margin:0 0 6px}
+.sub{color:var(--mute);margin:0 0 20px;max-width:62ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.row+.row{margin-top:12px}
+.lbl{font-size:14px;color:var(--mute);min-width:104px}
+button{font:inherit;font-size:15px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:var(--accT)}
+button.main{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+:focus-visible{outline:3px solid var(--root);outline-offset:2px}
+.result{display:flex;flex-wrap:wrap;gap:6px 28px;align-items:baseline}
+.name{font:600 clamp(32px,7vw,52px)/1 Georgia,serif}
+.facts{color:var(--mute)}
+.facts b{color:var(--ink);font-weight:600}
+.kbwrap{overflow-x:auto;padding-bottom:6px}
+.kb{position:relative;height:210px;min-width:860px;user-select:none;-webkit-user-select:none}
+.k{position:absolute;top:0;cursor:pointer;display:flex;align-items:flex-end;justify-content:center;font-size:12px;font-weight:600;padding-bottom:8px}
+.w{height:100%;background:var(--wk);border:1px solid #9aa6b8;border-radius:0 0 6px 6px;color:#14213d}
+.b{height:62%;background:var(--bk);border-radius:0 0 4px 4px;z-index:2;color:#fff}
+.k.on,.k.sel{background:var(--acc);color:var(--accT)}
+.k.root{background:var(--root);color:#14213d}
+.hint{color:var(--mute);font-size:14px;margin:10px 0 0}
+#msg{min-height:1.5em;font-weight:600;margin:10px 0 0}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.hide{display:none}
+@media (prefers-reduced-motion:no-preference){.k{transition:background .08s}}
+</style>
 </head>
 <body>
-<header class="top">
-  <h1>Шпаргалка пианиста</h1>
-  <p>Выберите ноту и тип аккорда: клавиши подсветятся, а нажатие на «Играть» озвучит его.</p>
-</header>
-
 <main>
-  <section class="panel" aria-label="Выбор аккорда">
-    <div class="row">
-      <span class="lbl">Нота</span>
-      <div id="roots" class="chips" role="group" aria-label="Основная нота"></div>
-    </div>
-    <div class="row">
-      <span class="lbl">Трезвучия</span>
-      <div id="typesTriad" class="chips" role="group" aria-label="Трезвучия"></div>
-    </div>
-    <div class="row">
-      <span class="lbl">Септаккорды</span>
-      <div id="typesSeventh" class="chips" role="group" aria-label="Септаккорды"></div>
-    </div>
-    <div class="row">
-      <span class="lbl">Обращение</span>
-      <div id="invs" class="chips" role="group" aria-label="Обращение"></div>
-    </div>
-    <div class="row">
-      <span class="lbl">Названия нот</span>
-      <div class="chips" role="group" aria-label="Система названий нот">
-        <button id="langEn" class="chip on">C D E</button>
-        <button id="langRu" class="chip">До Ре Ми</button>
-      </div>
-    </div>
-  </section>
+<h1>Интерактивная шпаргалка пианиста</h1>
+<p class="sub">Выберите ноту и тип аккорда: клавиши подсветятся, а аккорд прозвучит как на настоящем пианино. Режим «Тренажёр» поможет запомнить аккорды.</p>
 
-  <section class="result" aria-live="polite">
-    <h2 id="chordName"></h2>
-    <p id="chordNotes" class="notes"></p>
-    <p id="chordInfo" class="info"></p>
-    <div class="actions">
-      <button id="playChord" class="btn">Играть аккорд</button>
-      <button id="playArp" class="btn ghost">Играть по нотам</button>
-    </div>
-    <p id="status" class="hint"></p>
-  </section>
+<div class="panel">
+  <div class="row"><span class="lbl">Режим</span>
+    <button data-mode="learn" aria-pressed="true">Справочник</button>
+    <button data-mode="quiz" aria-pressed="false">Тренажёр</button>
+    <button id="solfa" aria-pressed="false" style="margin-left:auto">Названия: до-ре-ми</button>
+  </div>
+</div>
 
-  <section aria-label="Клавиатура">
-    <div class="kb-wrap"><div id="keyboard" class="keyboard"></div></div>
-    <p class="hint">Клавиши кликабельны: нажмите любую, чтобы услышать ноту.</p>
-  </section>
+<div class="panel" id="learn">
+  <div class="row"><span class="lbl">Нота</span><span class="row" id="roots"></span></div>
+  <div class="row"><span class="lbl">Трезвучия</span><span class="row" id="typesT"></span></div>
+  <div class="row"><span class="lbl">Септаккорды</span><span class="row" id="typesS"></span></div>
+  <div class="row"><span class="lbl">Положение</span><span class="row" id="invs"></span></div>
+</div>
 
-  <section class="panel" aria-label="Все аккорды от выбранной ноты">
-    <h3 id="allTitle"></h3>
-    <div id="all" class="all"></div>
-  </section>
+<div class="panel hide" id="quiz">
+  <div class="result"><span class="name" id="task">—</span><span class="facts" id="qhint"></span></div>
+  <div class="row" style="margin-top:12px">
+    <button class="main" id="check">Проверить</button>
+    <button id="show">Показать ответ</button>
+    <button id="next">Следующий аккорд</button>
+    <button id="clear">Сбросить</button>
+  </div>
+  <p id="msg" role="status"></p>
+</div>
+
+<div class="panel" id="info">
+  <div class="result">
+    <span class="name" id="cname"></span>
+    <span class="facts" id="cnotes"></span>
+  </div>
+  <p class="facts" id="cdesc" style="margin:8px 0 0"></p>
+  <div class="row" style="margin-top:12px">
+    <button class="main" id="play">▶ Сыграть аккорд</button>
+    <button id="arp">Сыграть по нотам</button>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="kbwrap"><div class="kb" id="kb" role="group" aria-label="Клавиатура пианино"></div></div>
+  <p class="hint">Оранжевая клавиша: основной тон аккорда. Любую клавишу можно нажать, чтобы услышать звук.</p>
+  <p class="hint" id="snd"></p>
+</div>
 </main>
 
-<footer>Учебный проект: интерактивный веб-справочник для визуализации аккордов.<br>Звук рояля: Salamander Grand Piano, автор Alexander Holm (CC BY 3.0), через tonejs.github.io</footer>
-<script src="script.js"></script>
+<script>
+const NOTES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const SOL=['до','до♯','ре','ре♯','ми','фа','фа♯','соль','соль♯','ля','ля♯','си'];
+// g: 0 — трезвучие, 1 — септаккорд
+const TYPES=[
+ {g:0,n:'Мажорное',s:'',iv:[0,4,7],d:'Светлое, устойчивое звучание. Большая терция + малая терция.'},
+ {g:0,n:'Минорное',s:'m',iv:[0,3,7],d:'Мягкое, грустное звучание. Малая терция + большая терция.'},
+ {g:0,n:'Уменьшённое',s:'dim',iv:[0,3,6],d:'Напряжённый аккорд из двух малых терций, хочет разрешиться.'},
+ {g:0,n:'Увеличенное',s:'aug',iv:[0,4,8],d:'Неустойчивое, «парящее» звучание из двух больших терций.'},
+ {g:0,n:'Sus2',s:'sus2',iv:[0,2,7],d:'Вместо терции секунда. Звучит открыто, без мажора и минора.'},
+ {g:0,n:'Sus4',s:'sus4',iv:[0,5,7],d:'Вместо терции кварта. Создаёт ожидание, часто разрешается в мажор.'},
+ {g:1,n:'Доминантсептаккорд',s:'7',iv:[0,4,7,10],d:'Мажорное трезвучие + малая септима. Яркое напряжение, ведёт к тонике.'},
+ {g:1,n:'Большой мажорный септаккорд',s:'maj7',iv:[0,4,7,11],d:'Мажорное трезвучие + большая септима. Мечтательный, «джазовый» звук.'},
+ {g:1,n:'Малый минорный септаккорд',s:'m7',iv:[0,3,7,10],d:'Минорное трезвучие + малая септима. Тёплый, спокойный звук.'},
+ {g:1,n:'Минорный с большой септимой',s:'m(maj7)',iv:[0,3,7,11],d:'Минорное трезвучие + большая септима. Загадочный, «киношный» звук.'},
+ {g:1,n:'Полууменьшённый',s:'m7♭5',iv:[0,3,6,10],d:'Уменьшённое трезвучие + малая септима. Часто встречается в джазе.'},
+ {g:1,n:'Уменьшённый септаккорд',s:'dim7',iv:[0,3,6,9],d:'Все терции малые. Очень напряжённый, симметричный аккорд.'}
+];
+const IVN={0:'1',2:'2',3:'м3',4:'б3',5:'ч4',6:'ум5',7:'ч5',8:'ув5',9:'ум7',10:'м7',11:'б7'};
+const INVN=[['Основное','Секстаккорд','Квартсекстаккорд'],['Основное','Квинтсекстаккорд','Терцквартаккорд','Секундаккорд']];
+const LOW=48,TOTAL=36,OFF=12,BLACK=[1,3,6,8,10];   // клавиши C3..B5; аккорд строится от C4
+let root=0,type=0,inv=0,solfa=false,mode='learn',sel=new Set(),target=null;
+const $=id=>document.getElementById(id);
+const nm=m=>(solfa?SOL:NOTES)[m%12];
+
+/* ---------- клавиатура ---------- */
+const kb=$('kb'),keys={};
+(function(){
+  let wi=0;const w=100/(TOTAL*7/12);
+  for(let m=LOW;m<LOW+TOTAL;m++){
+    const el=document.createElement('div'),b=BLACK.includes(m%12);
+    el.className='k '+(b?'b':'w');el.dataset.m=m;
+    if(b){el.style.left=(wi*w-w*.3)+'%';el.style.width=(w*.6)+'%'}
+    else{el.style.left=(wi*w)+'%';el.style.width=w+'%';wi++}
+    kb.appendChild(el);keys[m]=el;
+  }
+})();
+
+/* ---------- звук: настоящее пианино ----------
+   1) ваши записи из папки sounds/ (C3.mp3, Cs3.mp3, D3.mp3 ...)
+   2) если записей нет — сэмплы рояля Salamander из интернета
+   3) если нет и интернета — запасной синтез                    */
+const EXT='.mp3';
+const SF=['C','Cs','D','Ds','E','F','Fs','G','Gs','A','As','B'];
+const noteFile=m=>SF[m%12]+(Math.floor(m/12)-1)+EXT;
+const CDN='https://tonejs.github.io/audio/salamander/';
+let ac,master;const buf={};let src='none';
+function ctx(){
+  if(!ac){ac=new(window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=.9;master.connect(ac.destination)}
+  return ac;
+}
+function grab(url,m){
+  return fetch(url).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()})
+    .then(d=>ctx().decodeAudioData(d)).then(b=>{buf[m]=b}).catch(()=>{});
+}
+async function loadSounds(){
+  const st=$('snd');st.textContent='Загружаю звук пианино…';
+  const jobs=[];
+  for(let m=LOW;m<=LOW+TOTAL;m++)jobs.push(grab('sounds/'+noteFile(m),m));
+  await Promise.all(jobs);
+  if(Object.keys(buf).length>=4){src='own';st.textContent='Звук: ваши записи пианино ('+Object.keys(buf).length+' нот).';return}
+  const cj=[];
+  for(let m=LOW;m<=LOW+TOTAL;m+=3)cj.push(grab(CDN+noteFile(m),m));
+  await Promise.all(cj);
+  if(Object.keys(buf).length>=4){src='cdn';st.textContent='Звук: рояль Salamander Grand Piano (Alexander Holm, CC BY 3.0).'}
+  else st.textContent='Не удалось загрузить пианино, играет запасной звук. Проверьте интернет или папку sounds/.';
+}
+function nearest(m){
+  let best=null,d=99;
+  for(const k in buf){const x=Math.abs(k-m);if(x<d){d=x;best=+k}}
+  return best;
+}
+function tone(m,t=0,dur=1.8,vol=.7){
+  const a=ctx();if(a.state==='suspended')a.resume();
+  const s=a.currentTime+t,note=m;
+  const base=Object.keys(buf).length?nearest(note):null;
+  const g=a.createGain();g.connect(master);
+  if(base!==null){
+    const o=a.createBufferSource();o.buffer=buf[base];
+    o.playbackRate.value=Math.pow(2,(note-base)/12);
+    g.gain.setValueAtTime(vol,s);g.gain.setValueAtTime(vol,s+dur);g.gain.linearRampToValueAtTime(0,s+dur+.6);
+    o.connect(g);o.start(s);o.stop(s+dur+.7);
+  }else{
+    // запасной «фортепианный» тембр
+    const f=440*Math.pow(2,(note-69)/12),lp=a.createBiquadFilter();
+    lp.type='lowpass';lp.frequency.setValueAtTime(Math.min(f*8,6000),s);lp.frequency.exponentialRampToValueAtTime(f*2,s+1.5);
+    g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(vol*.5,s+.008);g.gain.exponentialRampToValueAtTime(.0008,s+dur+1.2);
+    lp.connect(g);
+    [1,2,3,4,5].forEach((h,i)=>{const o=a.createOscillator(),hg=a.createGain();
+      o.frequency.value=f*h*(1+.0004*h*h);hg.gain.value=1/(h*h*.8+i);
+      o.connect(hg);hg.connect(lp);o.start(s);o.stop(s+dur+1.3)});
+  }
+}
+
+/* ---------- аккорд ---------- */
+const T=()=>TYPES[type];
+function chord(r=root,t=type,i=inv){
+  const ns=TYPES[t].iv.map(x=>LOW+OFF+r+x);
+  for(let k=0;k<i;k++)ns.push(ns.shift()+12);
+  return ns;
+}
+const cname=(r=root,t=type)=>(solfa?SOL:NOTES)[r]+TYPES[t].s;
+
+function render(){
+  Object.values(keys).forEach(k=>{k.classList.remove('on','root','sel');k.textContent=''});
+  if(mode==='learn'){
+    chord().forEach(m=>{keys[m].classList.add('on');keys[m].textContent=nm(m);if(m%12===root)keys[m].classList.add('root')});
+    $('cname').textContent=cname();
+    const invTxt=INVN[T().g][inv];
+    $('cnotes').innerHTML='<b>Ноты:</b> '+chord().map(nm).join(' · ')+'<br><b>Формула:</b> '+T().iv.map(x=>IVN[x]).join(' – ')+'<br><b>Положение:</b> '+invTxt;
+    $('cdesc').textContent=T().n+'. '+T().d;
+  }else{
+    sel.forEach(m=>{keys[m].classList.add('sel');keys[m].textContent=nm(m)});
+  }
+  $('info').classList.toggle('hide',mode!=='learn');
+}
+
+function pill(box,items,get,set){
+  const c=$(box);c.innerHTML='';
+  items.forEach(({t,i})=>{const b=document.createElement('button');b.textContent=t;
+    b.setAttribute('aria-pressed',get()===i);b.onclick=()=>{set(i);buildUI();render();play()};c.appendChild(b)});
+}
+function buildUI(){
+  pill('roots',NOTES.map((n,i)=>({t:solfa?SOL[i]:n,i})),()=>root,i=>root=i);
+  const pickType=i=>{type=i;inv=Math.min(inv,T().iv.length-1)};
+  [['typesT',0],['typesS',1]].forEach(([box,g])=>
+    pill(box,TYPES.map((x,i)=>({t:x.n,i,g})).filter(x=>TYPES[x.i].g===g),()=>type,pickType));
+  pill('invs',INVN[T().g].map((t,i)=>({t,i})),()=>inv,i=>inv=i);
+}
+function play(){chord().forEach(m=>tone(m,0,2,.5))}
+$('play').onclick=play;
+$('arp').onclick=()=>chord().forEach((m,i)=>tone(m,i*.4,1.5,.7));
+
+kb.addEventListener('pointerdown',e=>{
+  const k=e.target.closest('.k');if(!k)return;
+  const m=+k.dataset.m;tone(m,0,1.5);
+  if(mode==='quiz'){sel.has(m)?sel.delete(m):sel.add(m);$('msg').textContent='';render()}
+});
+
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{
+  mode=b.dataset.mode;
+  document.querySelectorAll('[data-mode]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  $('learn').classList.toggle('hide',mode!=='learn');
+  $('quiz').classList.toggle('hide',mode!=='quiz');
+  if(mode==='quiz')newQ();else render();
+});
+$('solfa').onclick=function(){solfa=!solfa;this.setAttribute('aria-pressed',solfa);buildUI();render();if(mode==='quiz')showTask()};
+
+/* ---------- тренажёр ---------- */
+function showTask(){$('task').textContent=cname(target.r,target.t)}
+function newQ(){
+  target={r:Math.floor(Math.random()*12),t:Math.floor(Math.random()*TYPES.length)};
+  sel.clear();$('msg').textContent='';$('msg').className='';showTask();
+  $('qhint').textContent=TYPES[target.t].n+'. Нажимайте клавиши, чтобы выбрать ноты аккорда.';render();
+}
+$('next').onclick=newQ;
+$('clear').onclick=()=>{sel.clear();$('msg').textContent='';render()};
+$('check').onclick=()=>{
+  const need=new Set(chord(target.r,target.t,0).map(m=>m%12)),got=new Set([...sel].map(m=>m%12));
+  const ok=need.size===got.size&&[...need].every(x=>got.has(x));
+  const m=$('msg');m.className=ok?'ok':'bad';
+  m.textContent=ok?'Верно! Это '+cname(target.r,target.t)+'.':
+    got.size===0?'Сначала выберите клавиши.':'Пока не так. Подсказка: в аккорде '+need.size+' разных ноты, начиная с '+nm(target.r)+'.';
+  if(ok)[...sel].sort((a,b)=>a-b).forEach(n=>tone(n,0,2,.5));
+};
+$('show').onclick=()=>{sel=new Set(chord(target.r,target.t,0));$('msg').className='';$('msg').textContent='Ответ: '+chord(target.r,target.t,0).map(nm).join(' · ');render()};
+
+buildUI();render();loadSounds();
+</script>
 </body>
 </html>
